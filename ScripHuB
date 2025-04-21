@@ -1,113 +1,179 @@
--- LikaMC HUB - Clean Version (Banana UI Style)
--- Created by ChatGPT for Blox Fruits
+--// Kavo UI Loader
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
+local Window = Library.CreateLib("LikaMC HUB - Blox Fruits", "Ocean")
 
-repeat wait() until game:IsLoaded()
+--// Services & Variables
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local RS = game:GetService("ReplicatedStorage")
+local _G = {
+    AutoFarmLevel = false,
+    AutoFarmBoss = false,
+    KillAura = false,
+    AutoStats = false,
+    AutoBuyItems = false,
+    ESPFruits = false,
+    ESPPlayers = false,
+    FruitSniper = false,
+    V4Notify = false
+}
 
-local LikaMC = Instance.new("ScreenGui")
-local Main = Instance.new("Frame")
-local SideBar = Instance.new("Frame")
-local Title = Instance.new("TextLabel")
-local Logo = Instance.new("ImageLabel")
-local Tabs = {}
-local Pages = {}
+--// Tabs
+local main = Window:NewTab("Main")
+local auto = Window:NewTab("Auto")
+local esp = Window:NewTab("ESP")
+local tp = Window:NewTab("Teleport")
+local boost = Window:NewTab("FPS Boost")
+local misc = Window:NewTab("Misc")
 
--- GUI Setup
-LikaMC.Name = "LikaMC"
-LikaMC.Parent = game.CoreGui
-LikaMC.ResetOnSpawn = false
+--// UI Sections & Toggles
+main:NewSection("Auto Farm"):NewToggle("Auto Farm Level", "Farm based on your level", function(v) _G.AutoFarmLevel = v end)
+main:NewSection("Auto Farm"):NewToggle("Auto Farm Boss", "Farm bosses automatically", function(v) _G.AutoFarmBoss = v end)
+main:NewSection("Auto Farm"):NewToggle("Kill Aura", "Auto attack nearby enemies", function(v) _G.KillAura = v end)
 
-Main.Name = "Main"
-Main.Parent = LikaMC
-Main.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-Main.Position = UDim2.new(0.25, 0, 0.2, 0)
-Main.Size = UDim2.new(0, 520, 0, 330)
-Main.Active = true
-Main.Draggable = true
-
-SideBar.Name = "SideBar"
-SideBar.Parent = Main
-SideBar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-SideBar.Size = UDim2.new(0, 140, 1, 0)
-
-Logo.Name = "Logo"
-Logo.Parent = SideBar
-Logo.BackgroundTransparency = 1
-Logo.Position = UDim2.new(0.07, 0, 0, 10)
-Logo.Size = UDim2.new(0, 110, 0, 100)
-Logo.Image = "rbxassetid://98479958513387" -- Logo ID
-
-Title.Name = "Title"
-Title.Parent = SideBar
-Title.Text = "LikaMC HUB"
-Title.Position = UDim2.new(0, 0, 0, 115)
-Title.Size = UDim2.new(1, 0, 0, 30)
-Title.TextColor3 = Color3.new(1, 1, 1)
-Title.BackgroundTransparency = 1
-Title.Font = Enum.Font.GothamBold
-Title.TextSize = 16
-
--- Tabs
-local tabNames = {"Main", "Misc", "Settings"}
-for i, name in ipairs(tabNames) do
-    local tabBtn = Instance.new("TextButton")
-    tabBtn.Parent = SideBar
-    tabBtn.Text = name
-    tabBtn.Size = UDim2.new(1, 0, 0, 30)
-    tabBtn.Position = UDim2.new(0, 0, 0, 150 + (i - 1) * 35)
-    tabBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-    tabBtn.TextColor3 = Color3.new(1, 1, 1)
-    tabBtn.Font = Enum.Font.Gotham
-    tabBtn.TextSize = 14
-
-    local page = Instance.new("Frame")
-    page.Parent = Main
-    page.Size = UDim2.new(1, -140, 1, 0)
-    page.Position = UDim2.new(0, 140, 0, 0)
-    page.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-    page.Visible = (i == 1)
-    Pages[name] = page
-    Tabs[name] = tabBtn
-
-    tabBtn.MouseButton1Click:Connect(function()
-        for _, p in pairs(Pages) do p.Visible = false end
-        page.Visible = true
-    end)
-end
-
--- Button creator
-local function createButton(tab, text, y, color, callback)
-    local btn = Instance.new("TextButton", Pages[tab])
-    btn.Text = text
-    btn.Position = UDim2.new(0, 20, 0, y)
-    btn.Size = UDim2.new(0, 200, 0, 35)
-    btn.BackgroundColor3 = color
-    btn.TextColor3 = Color3.new(1, 1, 1)
-    btn.Font = Enum.Font.Gotham
-    btn.TextSize = 14
-    btn.MouseButton1Click:Connect(callback)
-end
-
--- Main Tab
-createButton("Main", "Auto Farm Level", 20, Color3.fromRGB(0, 170, 255), function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/xQuartyx/DonateMe/main/AutoFarmBF"))()
+auto:NewSection("Auto Features"):NewToggle("Auto Stats", "Auto upgrade stats", function(v) _G.AutoStats = v end)
+auto:NewSection("Auto Features"):NewToggle("Auto Buy Items", "Auto buy haki/items", function(v) _G.AutoBuyItems = v end)
+auto:NewSection("Auto Features"):NewButton("Enable Buso", "Activates Armament Haki", function()
+    RS.Remotes.CommF_:InvokeServer("Buso")
 end)
 
--- Misc Tab
-createButton("Misc", "Enable Buso Haki", 20, Color3.fromRGB(80, 80, 180), function()
-    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("Buso")
+esp:NewSection("ESP"):NewToggle("ESP Fruits", "Shows devil fruits on map", function(v) _G.ESPFruits = v end)
+esp:NewSection("ESP"):NewToggle("ESP Players", "Shows other players", function(v) _G.ESPPlayers = v end)
+
+tp:NewSection("Teleport"):NewButton("To Start Island", "Teleport to beginning", function()
+    LocalPlayer.Character:MoveTo(Vector3.new(1056, 16, 1428))
+end)
+tp:NewSection("Teleport"):NewButton("To Sea 2", "Second Sea", function()
+    LocalPlayer.Character:MoveTo(Vector3.new(-6500, 250, -1245))
 end)
 
-createButton("Misc", "FPS Boost", 60, Color3.fromRGB(80, 180, 100), function()
+boost:NewSection("FPS Boost"):NewButton("Boost FPS", "Reduces lag", function()
     for _, v in pairs(game:GetDescendants()) do
-        if v:IsA("BasePart") and v:IsDescendantOf(workspace) then
-            v.Material = Enum.Material.SmoothPlastic
-            v.Reflectance = 0
+        if v:IsA("BasePart") then v.Material = Enum.Material.SmoothPlastic end
+    end
+    setfpscap(60)
+end)
+
+misc:NewSection("Misc"):NewButton("Anti AFK", "Prevents idle kick", function()
+    local vu = game:GetService("VirtualUser")
+    LocalPlayer.Idled:Connect(function()
+        vu:Button2Down(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
+        wait(1)
+        vu:Button2Up(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
+    end)
+end)
+misc:NewSection("Misc"):NewButton("Server Hop", "Hop servers", function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/TypicalScripting/serverhop/main/serverhop.lua"))()
+end)
+misc:NewSection("Misc"):NewButton("Rejoin Server", "Rejoin current server", function()
+    game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, game.JobId, LocalPlayer)
+end)
+misc:NewSection("Extra"):NewToggle("Fruit Sniper", "Auto grabs fruits", function(v) _G.FruitSniper = v end)
+misc:NewSection("Extra"):NewToggle("Race V4 Notify", "Notifies if V4 trial is open", function(v) _G.V4Notify = v end)
+
+--// Logic: Kill Aura
+spawn(function()
+    while wait() do
+        if _G.KillAura then
+            pcall(function()
+                for _, mob in pairs(workspace.Enemies:GetChildren()) do
+                    if mob:FindFirstChild("HumanoidRootPart") and mob.Humanoid.Health > 0 then
+                        if (mob.HumanoidRootPart.Position - LocalPlayer.Character.HumanoidRootPart.Position).Magnitude < 50 then
+                            RS.Remotes.CommF_:InvokeServer("Attack")
+                        end
+                    end
+                end
+            end)
         end
     end
-    settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
 end)
 
--- Settings Tab
-createButton("Settings", "Close GUI", 20, Color3.fromRGB(180, 60, 60), function()
-    LikaMC:Destroy()
+--// Logic: Auto Stats
+spawn(function()
+    while wait(1) do
+        if _G.AutoStats then
+            RS.Remotes.CommF_:InvokeServer("AddPoint", "Melee", 1)
+        end
+    end
+end)
+
+--// Logic: Auto Buy Items
+spawn(function()
+    while wait(5) do
+        if _G.AutoBuyItems then
+            RS.Remotes.CommF_:InvokeServer("BuyHaki", "Buso")
+            RS.Remotes.CommF_:InvokeServer("BuyHaki", "Observation")
+            RS.Remotes.CommF_:InvokeServer("BuyKenTalk")
+        end
+    end
+end)
+
+--// Logic: Auto Farm Boss
+local BossList = {"The Gorilla King", "Bobby", "Yeti", "Vice Admiral", "Warden", "Chief Warden", "Swan", "Magma Admiral"}
+spawn(function()
+    while wait() do
+        if _G.AutoFarmBoss then
+            for _, boss in pairs(workspace.Enemies:GetChildren()) do
+                if table.find(BossList, boss.Name) and boss:FindFirstChild("HumanoidRootPart") and boss.Humanoid.Health > 0 then
+                    repeat
+                        LocalPlayer.Character:MoveTo(boss.HumanoidRootPart.Position + Vector3.new(0, 10, 0))
+                        RS.Remotes.CommF_:InvokeServer("Attack")
+                        wait()
+                    until boss.Humanoid.Health <= 0 or not _G.AutoFarmBoss
+                end
+            end
+        end
+    end
+end)
+
+--// Logic: Fruit ESP
+spawn(function()
+    while wait() do
+        if _G.ESPFruits then
+            for _, fruit in pairs(workspace:GetDescendants()) do
+                if fruit:IsA("Tool") and fruit.Name:find("Fruit") and not fruit:FindFirstChild("ESP") then
+                    local esp = Instance.new("BillboardGui", fruit)
+                    esp.Name = "ESP"
+                    esp.Size = UDim2.new(0, 100, 0, 40)
+                    esp.AlwaysOnTop = true
+                    esp.StudsOffset = Vector3.new(0, 2, 0)
+                    local text = Instance.new("TextLabel", esp)
+                    text.Size = UDim2.new(1, 0, 1, 0)
+                    text.Text = fruit.Name
+                    text.TextColor3 = Color3.fromRGB(255, 255, 0)
+                    text.TextStrokeTransparency = 0
+                    text.BackgroundTransparency = 1
+                end
+            end
+        end
+    end
+end)
+
+--// Logic: Fruit Sniper
+spawn(function()
+    while wait(3) do
+        if _G.FruitSniper then
+            for _, fruit in pairs(workspace:GetDescendants()) do
+                if fruit:IsA("Tool") and fruit.Name:find("Fruit") then
+                    LocalPlayer.Character.HumanoidRootPart.CFrame = fruit.Handle.CFrame
+                    wait(0.5)
+                    firetouchinterest(LocalPlayer.Character.HumanoidRootPart, fruit.Handle, 0)
+                    firetouchinterest(LocalPlayer.Character.HumanoidRootPart, fruit.Handle, 1)
+                end
+            end
+        end
+    end
+end)
+
+--// Logic: Race V4 Notify
+spawn(function()
+    while wait(10) do
+        if _G.V4Notify and game.Workspace:FindFirstChild("RaceV4Orb") then
+            game.StarterGui:SetCore("SendNotification", {
+                Title = "LikaMC HUB",
+                Text = "Race V4 Trial is OPEN!",
+                Duration = 5
+            })
+        end
+    end
 end)
