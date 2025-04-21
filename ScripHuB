@@ -1,0 +1,113 @@
+-- LikaMC HUB - Clean Version (Banana UI Style)
+-- Created by ChatGPT for Blox Fruits
+
+repeat wait() until game:IsLoaded()
+
+local LikaMC = Instance.new("ScreenGui")
+local Main = Instance.new("Frame")
+local SideBar = Instance.new("Frame")
+local Title = Instance.new("TextLabel")
+local Logo = Instance.new("ImageLabel")
+local Tabs = {}
+local Pages = {}
+
+-- GUI Setup
+LikaMC.Name = "LikaMC"
+LikaMC.Parent = game.CoreGui
+LikaMC.ResetOnSpawn = false
+
+Main.Name = "Main"
+Main.Parent = LikaMC
+Main.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+Main.Position = UDim2.new(0.25, 0, 0.2, 0)
+Main.Size = UDim2.new(0, 520, 0, 330)
+Main.Active = true
+Main.Draggable = true
+
+SideBar.Name = "SideBar"
+SideBar.Parent = Main
+SideBar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+SideBar.Size = UDim2.new(0, 140, 1, 0)
+
+Logo.Name = "Logo"
+Logo.Parent = SideBar
+Logo.BackgroundTransparency = 1
+Logo.Position = UDim2.new(0.07, 0, 0, 10)
+Logo.Size = UDim2.new(0, 110, 0, 100)
+Logo.Image = "rbxassetid://98479958513387" -- Logo ID
+
+Title.Name = "Title"
+Title.Parent = SideBar
+Title.Text = "LikaMC HUB"
+Title.Position = UDim2.new(0, 0, 0, 115)
+Title.Size = UDim2.new(1, 0, 0, 30)
+Title.TextColor3 = Color3.new(1, 1, 1)
+Title.BackgroundTransparency = 1
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 16
+
+-- Tabs
+local tabNames = {"Main", "Misc", "Settings"}
+for i, name in ipairs(tabNames) do
+    local tabBtn = Instance.new("TextButton")
+    tabBtn.Parent = SideBar
+    tabBtn.Text = name
+    tabBtn.Size = UDim2.new(1, 0, 0, 30)
+    tabBtn.Position = UDim2.new(0, 0, 0, 150 + (i - 1) * 35)
+    tabBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    tabBtn.TextColor3 = Color3.new(1, 1, 1)
+    tabBtn.Font = Enum.Font.Gotham
+    tabBtn.TextSize = 14
+
+    local page = Instance.new("Frame")
+    page.Parent = Main
+    page.Size = UDim2.new(1, -140, 1, 0)
+    page.Position = UDim2.new(0, 140, 0, 0)
+    page.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    page.Visible = (i == 1)
+    Pages[name] = page
+    Tabs[name] = tabBtn
+
+    tabBtn.MouseButton1Click:Connect(function()
+        for _, p in pairs(Pages) do p.Visible = false end
+        page.Visible = true
+    end)
+end
+
+-- Button creator
+local function createButton(tab, text, y, color, callback)
+    local btn = Instance.new("TextButton", Pages[tab])
+    btn.Text = text
+    btn.Position = UDim2.new(0, 20, 0, y)
+    btn.Size = UDim2.new(0, 200, 0, 35)
+    btn.BackgroundColor3 = color
+    btn.TextColor3 = Color3.new(1, 1, 1)
+    btn.Font = Enum.Font.Gotham
+    btn.TextSize = 14
+    btn.MouseButton1Click:Connect(callback)
+end
+
+-- Main Tab
+createButton("Main", "Auto Farm Level", 20, Color3.fromRGB(0, 170, 255), function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/xQuartyx/DonateMe/main/AutoFarmBF"))()
+end)
+
+-- Misc Tab
+createButton("Misc", "Enable Buso Haki", 20, Color3.fromRGB(80, 80, 180), function()
+    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("Buso")
+end)
+
+createButton("Misc", "FPS Boost", 60, Color3.fromRGB(80, 180, 100), function()
+    for _, v in pairs(game:GetDescendants()) do
+        if v:IsA("BasePart") and v:IsDescendantOf(workspace) then
+            v.Material = Enum.Material.SmoothPlastic
+            v.Reflectance = 0
+        end
+    end
+    settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+end)
+
+-- Settings Tab
+createButton("Settings", "Close GUI", 20, Color3.fromRGB(180, 60, 60), function()
+    LikaMC:Destroy()
+end)
