@@ -1,0 +1,2 @@
+local Kavo = loadstring(game:HttpGet("https://raw.githubusercontent.com/KavoHub/KavoUI/main/source.lua"))()
+local Window = Kavo.CreateLib("LikaMC HUB", "DarkTheme")
