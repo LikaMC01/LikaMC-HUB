@@ -1,0 +1,8 @@
+Config = {
+
+namescript = "LikaMC HUB", --Tên Script
+
+logoscript = "98479958513387",--ID Logo Script
+
+tacgia = "LikaMC-- Tên Tác Giả
+loadstring(game:HttpGet("https://github.com/LikaMC01/LikaMC-HUB/blob/main/ScripHuB"))()
