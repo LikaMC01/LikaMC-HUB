@@ -1,0 +1,243 @@
+-- LikaMC HUB - Full Blox Fruits Script (Kavo UI)
+loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
+local Window = Library.CreateLib("LikaMC HUB", "Ocean")
+
+-- Services
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local RS = game:GetService("ReplicatedStorage")
+local TweenService = game:GetService("TweenService")
+local TeleportService = game:GetService("TeleportService")
+
+repeat task.wait() until LocalPlayer and LocalPlayer.Character and LocalPlayer:FindFirstChild("Data")
+local dataFolder = LocalPlayer:WaitForChild("Data")
+
+-- Global Toggles
+_G.AutoFarmLevel     = false
+_G.AutoFarmBoss      = false
+_G.KillAura          = false
+_G.AutoStats         = false
+_G.AutoBuyItems      = false
+_G.ESPFruits         = false
+_G.ESPPlayers        = false
+_G.FruitSniper       = false
+_G.V4Notify          = false
+_G.AutoSkillName     = ""
+_G.AutoSkillInterval = 1
+_G.AutoRaid          = false
+
+-- Quest Selection
+local function GetQuestInfo()
+    local lvl = dataFolder.Level.Value
+    local Ms, NameQuest, QuestLv, CFrameQ, CFrameMon
+    if lvl <= 9 then
+        Ms = "Bandit"; NameQuest = "BanditQuest1"; QuestLv = 1
+        CFrameQ = Vector3.new(1060,16,1547); CFrameMon = Vector3.new(1038,41,1576)
+    elseif lvl <= 14 then
+        Ms = "Monkey"; NameQuest = "JungleQuest"; QuestLv = 1
+        CFrameQ = Vector3.new(-1601,36,153); CFrameMon = Vector3.new(-1448,50,63)
+    elseif lvl <= 29 then
+        Ms = "Gorilla"; NameQuest = "JungleQuest"; QuestLv = 2
+        CFrameQ = Vector3.new(-1601,36,153); CFrameMon = Vector3.new(-1142,40,-515)
+    else
+        Ms = "Bandit"; NameQuest = "BanditQuest1"; QuestLv = 1
+        CFrameQ = Vector3.new(1060,16,1547); CFrameMon = Vector3.new(1038,41,1576)
+    end
+    return {Mob = Ms, QuestName = NameQuest, QuestLevel = QuestLv, QuestPos = CFrameQ, MobPos = CFrameMon}
+end
+
+-- Tween
+local function TweenTo(pos)
+    local root = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if root then
+        local dist = (root.Position - pos).Magnitude
+        TweenService:Create(root, TweenInfo.new(dist/250, Enum.EasingStyle.Linear), {CFrame = CFrame.new(pos)}):Play():Wait()
+    end
+end
+
+-- UI Setup
+local InfoTab = Window:NewTab("Thông Tin")
+InfoTab:NewSection("Thông Tin Script"):NewLabel("LikaMC HUB - Blox Fruits v1.0")
+
+local FarmTab = Window:NewTab("Farming")
+local farm = FarmTab:NewSection("Auto Farm")
+farm:NewToggle("Auto Farm Level", "Farm theo cấp", function(v) _G.AutoFarmLevel = v end)
+farm:NewToggle("Auto Farm Boss", "Đánh boss", function(v) _G.AutoFarmBoss = v end)
+farm:NewToggle("Kill Aura", "Tự đánh quanh người", function(v) _G.KillAura = v end)
+
+local SeaTab = Window:NewTab("Sea")
+local sea = SeaTab:NewSection("Dịch Chuyển Biển")
+sea:NewButton("Tới Sea 1", "Teleport", function() LocalPlayer.Character:MoveTo(Vector3.new(1056,16,1428)) end)
+sea:NewButton("Tới Sea 2", "Teleport", function() LocalPlayer.Character:MoveTo(Vector3.new(-6500,250,-1245)) end)
+sea:NewButton("Tới Sea 3", "Teleport", function() LocalPlayer.Character:MoveTo(Vector3.new(-12000,300,-3000)) end)
+
+local StatsTab = Window:NewTab("Stats & Skills")
+local stat = StatsTab:NewSection("Chỉ số & Skill")
+stat:NewToggle("Auto Stats", "Tự tăng điểm", function(v) _G.AutoStats = v end)
+stat:NewTextbox("Tên Skill", "VD: Z/X/C", function(txt) _G.AutoSkillName = txt end)
+stat:NewSlider("Delay Skill", "Delay sử dụng", 0.1, 5, function(val) _G.AutoSkillInterval = val end)
+stat:NewToggle("Auto Raid", "Tham gia Raid tự động", function(v) _G.AutoRaid = v end)
+stat:NewButton("Redeem Code", "Nhập Code sẵn có", function()
+    for _,code in ipairs({"FUDD10K","HERO10","BLOXFRUITS"}) do
+        pcall(function() RS.Remotes.CommF_:InvokeServer("RedeemCode", code) end); task.wait(1)
+    end
+end)
+
+local ItemTab = Window:NewTab("Items & Shop")
+local itm = ItemTab:NewSection("Vật phẩm")
+itm:NewToggle("Auto Buy Items", "Mua item tự động", function(v) _G.AutoBuyItems = v end)
+itm:NewButton("Buso Haki", "Bật haki", function() pcall(function() RS.Remotes.CommF_:InvokeServer("Buso") end) end)
+
+local VisualTab = Window:NewTab("ESP & Visuals")
+local vis = VisualTab:NewSection("ESP")
+vis:NewToggle("ESP Players", "Hiện người chơi", function(v) _G.ESPPlayers = v end)
+vis:NewToggle("ESP Fruits", "Hiện trái ác quỷ", function(v) _G.ESPFruits = v end)
+
+local FruitTab = Window:NewTab("Fruit Tools")
+FruitTab:NewSection("Trái Cây"):NewToggle("Fruit Sniper", "Nhặt trái", function(v) _G.FruitSniper = v end)
+
+local TPTab = Window:NewTab("Teleport")
+TPTab:NewSection("Dịch chuyển"):NewButton("Tới Đảo Chính", "Teleport", function()
+    LocalPlayer.Character:MoveTo(Vector3.new(1056,16,1428))
+end)
+
+local MiscTab = Window:NewTab("Misc")
+local misc = MiscTab:NewSection("Khác")
+misc:NewButton("Anti AFK", "Chống kick", function()
+    local vu = game:GetService("VirtualUser")
+    Players.LocalPlayer.Idled:Connect(function()
+        vu:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+        task.wait(1)
+        vu:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+    end)
+end)
+misc:NewButton("Server Hop", "Chuyển Server", function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/TypicalScripting/serverhop/main/serverhop.lua"))()
+end)
+misc:NewButton("Rejoin", "Vào lại", function()
+    TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, LocalPlayer)
+end)
+
+-- Dán logic Auto Farm, KillAura, ESP, Auto Buy,... vào dưới đây nếu cần-- LikaMC HUB - Full Blox Fruits Script (Kavo UI)
+loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
+local Window = Library.CreateLib("LikaMC HUB", "Ocean")
+
+-- Services
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local RS = game:GetService("ReplicatedStorage")
+local TweenService = game:GetService("TweenService")
+local TeleportService = game:GetService("TeleportService")
+
+repeat task.wait() until LocalPlayer and LocalPlayer.Character and LocalPlayer:FindFirstChild("Data")
+local dataFolder = LocalPlayer:WaitForChild("Data")
+
+-- Global Toggles
+_G.AutoFarmLevel     = false
+_G.AutoFarmBoss      = false
+_G.KillAura          = false
+_G.AutoStats         = false
+_G.AutoBuyItems      = false
+_G.ESPFruits         = false
+_G.ESPPlayers        = false
+_G.FruitSniper       = false
+_G.V4Notify          = false
+_G.AutoSkillName     = ""
+_G.AutoSkillInterval = 1
+_G.AutoRaid          = false
+
+-- Quest Selection
+local function GetQuestInfo()
+    local lvl = dataFolder.Level.Value
+    local Ms, NameQuest, QuestLv, CFrameQ, CFrameMon
+    if lvl <= 9 then
+        Ms = "Bandit"; NameQuest = "BanditQuest1"; QuestLv = 1
+        CFrameQ = Vector3.new(1060,16,1547); CFrameMon = Vector3.new(1038,41,1576)
+    elseif lvl <= 14 then
+        Ms = "Monkey"; NameQuest = "JungleQuest"; QuestLv = 1
+        CFrameQ = Vector3.new(-1601,36,153); CFrameMon = Vector3.new(-1448,50,63)
+    elseif lvl <= 29 then
+        Ms = "Gorilla"; NameQuest = "JungleQuest"; QuestLv = 2
+        CFrameQ = Vector3.new(-1601,36,153); CFrameMon = Vector3.new(-1142,40,-515)
+    else
+        Ms = "Bandit"; NameQuest = "BanditQuest1"; QuestLv = 1
+        CFrameQ = Vector3.new(1060,16,1547); CFrameMon = Vector3.new(1038,41,1576)
+    end
+    return {Mob = Ms, QuestName = NameQuest, QuestLevel = QuestLv, QuestPos = CFrameQ, MobPos = CFrameMon}
+end
+
+-- Tween
+local function TweenTo(pos)
+    local root = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if root then
+        local dist = (root.Position - pos).Magnitude
+        TweenService:Create(root, TweenInfo.new(dist/250, Enum.EasingStyle.Linear), {CFrame = CFrame.new(pos)}):Play():Wait()
+    end
+end
+
+-- UI Setup
+local InfoTab = Window:NewTab("Thông Tin")
+InfoTab:NewSection("Thông Tin Script"):NewLabel("LikaMC HUB - Blox Fruits v1.0")
+
+local FarmTab = Window:NewTab("Farming")
+local farm = FarmTab:NewSection("Auto Farm")
+farm:NewToggle("Auto Farm Level", "Farm theo cấp", function(v) _G.AutoFarmLevel = v end)
+farm:NewToggle("Auto Farm Boss", "Đánh boss", function(v) _G.AutoFarmBoss = v end)
+farm:NewToggle("Kill Aura", "Tự đánh quanh người", function(v) _G.KillAura = v end)
+
+local SeaTab = Window:NewTab("Sea")
+local sea = SeaTab:NewSection("Dịch Chuyển Biển")
+sea:NewButton("Tới Sea 1", "Teleport", function() LocalPlayer.Character:MoveTo(Vector3.new(1056,16,1428)) end)
+sea:NewButton("Tới Sea 2", "Teleport", function() LocalPlayer.Character:MoveTo(Vector3.new(-6500,250,-1245)) end)
+sea:NewButton("Tới Sea 3", "Teleport", function() LocalPlayer.Character:MoveTo(Vector3.new(-12000,300,-3000)) end)
+
+local StatsTab = Window:NewTab("Stats & Skills")
+local stat = StatsTab:NewSection("Chỉ số & Skill")
+stat:NewToggle("Auto Stats", "Tự tăng điểm", function(v) _G.AutoStats = v end)
+stat:NewTextbox("Tên Skill", "VD: Z/X/C", function(txt) _G.AutoSkillName = txt end)
+stat:NewSlider("Delay Skill", "Delay sử dụng", 0.1, 5, function(val) _G.AutoSkillInterval = val end)
+stat:NewToggle("Auto Raid", "Tham gia Raid tự động", function(v) _G.AutoRaid = v end)
+stat:NewButton("Redeem Code", "Nhập Code sẵn có", function()
+    for _,code in ipairs({"FUDD10K","HERO10","BLOXFRUITS"}) do
+        pcall(function() RS.Remotes.CommF_:InvokeServer("RedeemCode", code) end); task.wait(1)
+    end
+end)
+
+local ItemTab = Window:NewTab("Items & Shop")
+local itm = ItemTab:NewSection("Vật phẩm")
+itm:NewToggle("Auto Buy Items", "Mua item tự động", function(v) _G.AutoBuyItems = v end)
+itm:NewButton("Buso Haki", "Bật haki", function() pcall(function() RS.Remotes.CommF_:InvokeServer("Buso") end) end)
+
+local VisualTab = Window:NewTab("ESP & Visuals")
+local vis = VisualTab:NewSection("ESP")
+vis:NewToggle("ESP Players", "Hiện người chơi", function(v) _G.ESPPlayers = v end)
+vis:NewToggle("ESP Fruits", "Hiện trái ác quỷ", function(v) _G.ESPFruits = v end)
+
+local FruitTab = Window:NewTab("Fruit Tools")
+FruitTab:NewSection("Trái Cây"):NewToggle("Fruit Sniper", "Nhặt trái", function(v) _G.FruitSniper = v end)
+
+local TPTab = Window:NewTab("Teleport")
+TPTab:NewSection("Dịch chuyển"):NewButton("Tới Đảo Chính", "Teleport", function()
+    LocalPlayer.Character:MoveTo(Vector3.new(1056,16,1428))
+end)
+
+local MiscTab = Window:NewTab("Misc")
+local misc = MiscTab:NewSection("Khác")
+misc:NewButton("Anti AFK", "Chống kick", function()
+    local vu = game:GetService("VirtualUser")
+    Players.LocalPlayer.Idled:Connect(function()
+        vu:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+        task.wait(1)
+        vu:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+    end)
+end)
+misc:NewButton("Server Hop", "Chuyển Server", function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/TypicalScripting/serverhop/main/serverhop.lua"))()
+end)
+misc:NewButton("Rejoin", "Vào lại", function()
+    TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, LocalPlayer)
+end)
+
+-- Dán logic Auto Farm, KillAura, ESP, Auto Buy,... vào dưới đây nếu cần
